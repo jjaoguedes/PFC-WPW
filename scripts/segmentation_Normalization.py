@@ -90,14 +90,20 @@ for reg in tqdm(registros_unicos, desc="Segmentando registros"):
         segmentos_array = np.array(segmentos, dtype='float32')
         rotulos_array = np.array(rotulos, dtype='int32')
 
-        # Salva os arquivos
-        out_path = '/home/joaovfg/PFC-WPW/mit-bih-segmented-signals/'
-        os.makedirs(out_path, exist_ok=True)
+    # Diretório específico para o registro
+        base_out_path = '/home/joaovfg/PFC-WPW/mit-bih-segmented-signals/'
+        reg_out_path = os.path.join(base_out_path, str(reg))
+        os.makedirs(reg_out_path, exist_ok=True)
 
-        segmentos_array.tofile(os.path.join(out_path, f'segments_{reg}.dat'))
-        np.save(os.path.join(out_path, f'labels_{reg}.npy'), rotulos_array)
+    # Salva arquivos individuais por segmento
+    for idx, (seg, rot) in enumerate(zip(segmentos, rotulos)):
+        seg_filename = f'segment_{idx:04d}.dat'
+        label_filename = f'label_{idx:04d}.npy'
 
-        print(f"{reg}: {len(segmentos_array)} segmentos salvos.")
-        #print(f"Exemplo de rótulos: {rotulos_array[:5]}")
-    else:
-        print(f"{reg}: nenhum segmento válido.")
+        seg_path = os.path.join(reg_out_path, seg_filename)
+        label_path = os.path.join(reg_out_path, label_filename)
+
+        seg.astype('float32').tofile(seg_path)
+        np.save(label_path, np.array(rot, dtype='int32'))
+
+    print(f"{reg}: {len(segmentos)} segmentos salvos  em {reg_out_path}")
